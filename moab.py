@@ -1,115 +1,175 @@
 import random
-import json
+import time
+import pygame
     
-    
-
-class player:
-    def map(self):
-        bigmap = [[["Junk Junction"],[],["Motel"],["Lazy Links"],["River"],["Risky Reels"]],
-            [["Haunted Hills"],["Pleasant Park"],["Loot Lake"],["River"],["Tomato Town"],["Wailing Woods"]],
-            [['Abandoned Forest'],['Soccer Stadium'],['Tilted Towers'],['Dusty Divot'],['Retail Row'],['Lonely Lodge']],
-            [['Snobby Shores'],['Greasy Grove'],['Shifty Shafts'],['Salty Springs'],[],['Racing Course']],
-            [['You fell in water'],['Viking Hill'],[],['Fatal Fields'],["Paradise Palms"],[]],
-            [['You fell in water'],['You fell in water'],['Flush Factory'],['Lucky landing'],['Mexican Town'],[]]]
-        return bigmap
-    
+class opponent:      
     def __init__(self):
-        map = self.map()
-
-        drop = input("Where we droppin boys?: ")
-        for row in map:
-            for j in row:
-                
-                if j == []: j = ['']
-                k = j[0]
-                if drop == k:
-                    print("Location found")
-                    x = map.index(row)
-                    y = row.index(j)
-                    print(y,x)
-
-                    
-        while True:    
-            loc = map[x][y]
-            print(loc,x,y)
-            lis = ['x+',['x-']]
-            
-            to =  input("Where would you like to go?: ")
-            if  y == 5:
-                pass
-            if to == 'n':
-                x-=1
-                if map [x][y] == []: x-=1
-            elif to == "e":
-                y+=1
-                if map [x][y] == []: y+=1
-            elif to == 's':
-                x+=1
-                if map [x][y] == []: x+=1
-            elif to == "w":
-                y-=1
-                if map [x][y] == []: y-=1
-            elif to == "exit": break
-                
-            loc = map[x][y]
-
-
-        inv = ['Pickaxe']
-    
-        
-class opponent:
-    def tip(opp,skill,ki):
-        return None
-
-
-    def __init__(self, inv):
-        self.inv = inv
+        global kills
         kind = {'bot':10,'noob':1,'sweat': 90,'casual': 50,'ninja':99,'child':25}
-        
-        opp,skill = random.choice(list(kind.items()))
-        if opp == 'bot':
-            print('fight happening')
-            roll = random.randint(1,100)
-            if roll <= skill:
-                print("eat doodoo")
 
-            
-        print(opp,skill)
+        opp,skill = random.choices(list(kind.items()),weights=(40,10,10,25,2,13))[0]
         
+        print(f'A wild {opp} has appeared')
+        time.sleep(2)
+        invalue = 0
+
+        for i in inv.values():
+            if i > invalue:
+                invalue = i
+            else:
+                invalue += i/3
+        
+        if invalue-skill+(random.randint(-20,20)) > 0:
+            print("You won!")
+            kills += 1
+            print(f"You have {kills} kills")
+
+        else:
+            print("You died")
+            exit()
+            
+         
 
 class chest:
-    
-    #['\x1b[1mCommon\x1b[0m']
-    #weapons = ['Pistol','Shotgun','Assault rifle','Sub-machine gun','Sniper','Grenade launcher']
-
     def randitem(self):
-        rarities = ['Common','Uncommon','Rare','Epic','Legendary']
-        values = [20,40,60,80,99]
+        rarities = ['\033[1mCommon\033[0m','\033[1;32;40mUncommon\033[0m','\033[1;34;40mRare\033[0m','\033[1;35;40mEpic\033[0m','\033[1;33;40mLegendary\033[0m']
+        values = [20,40,60,80,100]
 
-        rarity = random.choices(rarities,weights=(45,35,14,4,2))
-        print(rarity)
-        
+        rarity = random.choices(rarities,weights=(35,25,20,14,6))[0]
         value = values[rarities.index(rarity)]
+        print(f"You found a {rarity} gun in a chest!")
+        return [rarity,value]
 
-        print(value)
-        choice = input(f"Would you like to pickup the {rarity} gun?")
-
-
-        while True:
-            if choice == "Yes":
-                return {rarity,value}
-            
-            elif choice == "No":
-                return None
-            
-            else:
-                print("That is not a valid input")
-            
-            break
 
     
     def __init__(self):
-        self.randitem()
+        pass
     
+def bmap():
+        bigmap = [[["Junk Junction"],[""],["Motel"],["Lazy Links"],["River"],["Risky Reels"]],
+            [["Haunted Hills"],["Pleasant Park"],["Loot Lake"],["River"],["Tomato Town"],["Wailing Woods"]],
+            [['Abandoned Forest'],['Soccer Stadium'],['Tilted Towers'],['Dusty Divot'],['Retail Row'],['Lonely Lodge']],
+            [['Snobby Shores'],['Greasy Grove'],['Shifty Shafts'],['Salty Springs'],[""],['Racing Course']],
+            [['You fell in water'],['Viking Hill'],[""],['Fatal Fields'],["Paradise Palms"],[""]],
+            [['You fell in water'],['You fell in water'],['Flush Factory'],['Lucky landing'],['Mexican Town'],[""]]]
+        return bigmap
 
-chest()
+def main():
+    map = bmap()
+    continued = True
+    while continued == True:
+        drop = input("Where we droppin boys?: ")
+        while True:
+            try:
+                for row in map:
+                    for j in row:
+                        k = j[0]
+                        
+                        if drop == k:
+                            continued = False
+                            print("Location found")
+                            x = map.index(row)
+                            y = row.index(j)
+                
+                break
+                
+            except:
+                pass
+
+
+    loc = map[x][y]
+
+    
+    global inv
+    global kills
+    inv = {'Pickaxe':10}
+    kills = 0
+    limit = False
+
+    while True:
+        print(f"You are now in {loc[0]}")
+        chestloot = False
+        chance = random.randint(1,2)
+
+        if chance == 1 and limit == False:
+            loot = chest().randitem()
+            chestloot = True
+
+
+        elif chance == 2 and limit == False:
+            opponent()
+
+        to =  input("\n>")
+
+        limit = False
+        
+        if kills == 6+ random.randint(1,7):
+                print("You won!")
+                exit()
+        
+        elif to == 'get' :
+            if chestloot == True:
+                inv[loot[0]] = loot[1]
+
+                print("Your inventory is: ",end=' ')
+
+                for i in inv:
+                    if i == "Pickaxe":
+                        print(i,end=", ")
+
+                    elif list(inv.keys())[-1] == i:
+                        print(f"and {i} Gun")
+
+                    else:
+                        print(i, end = " Gun, ")  
+                print("\n")
+            else:
+                print("You can't do that")
+                limit = True
+
+        elif to == 'n' :
+            if x == 0:
+                print("You can't walk off the map")
+            else:
+                x-=1 
+                if map [x][y] == [""]: x-=1
+
+
+        elif to == "e" :
+            if y ==5:
+                print("You can't walk off the map")
+            else:
+                y+=1
+                if map [x][y] == [""]: y+=1
+
+        elif to == 's' :
+            if x == 5:
+                print("You can't walk off the map")
+            else: 
+                x+=1
+                if map [x][y] == [""]: x+=1
+
+        elif to == "w" :
+            if y ==0:
+                print("You can't walk off the map")
+            else:
+                y-=1
+                if map [x][y] == [""]: y-=1
+    
+        
+        
+        loc = map[x][y]
+        if loc[0] == 'You fell in water':
+            print('You fell in water')
+            exit()
+
+        
+        
+
+
+
+
+            
+             
+
+main()
