@@ -162,14 +162,3 @@ def main():
         if loc[0] == 'You fell in water':
             print('You fell in water')
             exit()
-
-        
-        
-
-
-
-
-            
-             
-
-main()
