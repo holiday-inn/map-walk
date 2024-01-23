@@ -1,6 +1,6 @@
 import random
 import time
-import pygame
+
     
 class opponent:      
     def __init__(self):
@@ -20,7 +20,7 @@ class opponent:
                 invalue += i/3
         
         if invalue-skill+(random.randint(-20,20)) > 0:
-            print("You won!")
+            print("You won the fight!")
             kills += 1
             print(f"You have {kills} kills")
 
@@ -99,14 +99,22 @@ def main():
         elif chance == 2 and limit == False:
             opponent()
 
-        to =  input("\n>")
+        while True:
+            to =  input("\n>")
+            if to == "get" or to == "n" or to == "e" or to == "w" or to == "s" or to == "drop":
+                break
 
         limit = False
         
         if kills == 6+ random.randint(1,7):
                 print("You won!")
                 exit()
-        
+        elif to == 'drop':
+            inp = input("what drop?:")
+            for i in inv:
+                if i == inp:
+                    inv.pop(i)
+
         elif to == 'get' :
             if chestloot == True:
                 inv[loot[0]] = loot[1]
@@ -150,7 +158,7 @@ def main():
                 if map [x][y] == [""]: x+=1
 
         elif to == "w" :
-            if y ==0:
+            if y == 0:
                 print("You can't walk off the map")
             else:
                 y-=1
@@ -162,3 +170,4 @@ def main():
         if loc[0] == 'You fell in water':
             print('You fell in water')
             exit()
+main()
