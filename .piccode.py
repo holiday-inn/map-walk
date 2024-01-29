@@ -1,30 +1,34 @@
 import asyncio
 import pygame
-import time,random,tkinter
+import time,random,tkinter,math
 import playsound
 
-bigmap = [[["Junk Junction"],[""],["Motel"],["Lazy Links"],["River"],["Risky Reels"]],
+bigmap = [[["Junk Junction"],["Grass"],["Motel"],["Lazy Links"],["River"],["Risky Reels"]],
     [["Haunted Hills"],["Pleasant Park"],["Loot Lake"],["River"],["Tomato Town"],["Wailing Woods"]],
     [['Abandoned Forest'],['Soccer Stadium'],['Tilted Towers'],['Dusty Divot'],['Retail Row'],['Lonely Lodge']],
-    [['Snobby Shores'],['Greasy Grove'],['Shifty Shafts'],['Salty Springs'],[""],['Racing Course']],
-    [['You fell in water'],['Viking Hill'],[""],['Fatal Fields'],["Paradise Palms"],[""]],
-    [['You fell in water'],['You fell in water'],['Flush Factory'],['Lucky landing'],['Mexican Town'],[""]]]
-picmap = {}
+    [['Snobby Shores'],['Greasy Grove'],['Shifty Shafts'],['Salty Springs'],["Grass"],['Racing Course']],
+    [['Water'],['Viking Hill'],["Grass"],['Fatal Fields'],["Paradise Palms"],["Grass"]],
+    [['Water'],['Water'],['Flush Factory'],['Lucky landing'],['Mexican Town'],["Grass"]]]
+
+
+def blitRotate(surf, image, origin, pivot, angle):
+    image_rect = image.get_rect(topleft = (origin[0] - pivot[0], origin[1]-pivot[1]))
+    offset_center_to_pivot = pygame.math.Vector2(origin) - image_rect.center
+    rotated_offset = offset_center_to_pivot.rotate(-angle)
+    rotated_image_center = (origin[0] - rotated_offset.x, origin[1] - rotated_offset.y)
+    rotated_image = pygame.transform.rotate(image, angle)
+    rotated_image_rect = rotated_image.get_rect(center = rotated_image_center)
+    surf.blit(rotated_image, rotated_image_rect)
 
 
 
-
-
-
-tex = 'You fell in water'
 rarities = ["white","green","blue","purple","yellow"]
 
-while tex=='You fell in water':
-    randx = random.randint(0,5)
-    randy = random.randint(0,5)
-    tex = bigmap[randx][randy][0]
+randx = random.randint(0,5)
+randy = random.randint(0,5)
+tex = bigmap[randx][randy][0]
 
-print(tex)
+
 x = randx
 y = randy
 loc = bigmap[x][y]
@@ -34,7 +38,9 @@ chest = False
 bg = "#98FB98"
 color1 = "white"
 
-        
+
+potentialkills = [6,5,4,3,15,20]
+needkills = random.choices(potentialkills,weights=(40,25,13,10,10,2))[0]
 
 async def t2():
     global screen,chest
@@ -53,7 +59,8 @@ async def t2():
     
 
 async def t1():
-    global bigmap,x,y,tex,loc,screen,chest,bg,rarities,color1
+    global bigmap,x,y,tex,loc,screen,chest,bg,rarities,color1,needkills
+    kills = 0
     pygame.init()
     clock = pygame.time.Clock()
     chestspawn = False
@@ -64,30 +71,15 @@ async def t1():
     ches.convert()
     crect = ches.get_rect()
     crect.center = (random.randint(50,1230) , random.randint(50,670))
-    picmap1=[]
-    for i in picmap:
-        picmap1.append(print(picmap[i]))
 
 
-    if loc in picmap1:
-        picture = {picmap[loc]}
-    else:
-        picture = "junk.png"
-
-    map = pygame.image.load(picture)
+    map = pygame.image.load("junk.png")
     map.convert()
     map1 = map.get_rect()
     map1.center = (1280/2, 720/2)
 
 
 
-
-
-
-    gun = pygame.image.load('gun1.png')
-    gun.convert()
-    gun1 = gun.get_rect()
-    gun1.center = (1280/2 , 605 )
 
     enemy = {'bot':200,'noob':250,'sweat': 500,'casual': 450,'ninja':600,'child':400}
 
@@ -105,10 +97,11 @@ async def t1():
     vary = vary*skill
     
     dt = 0
-    print("run")
     player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
     enemy_pos = pygame.Vector2(screen.get_width() / 3, screen.get_height() / 3)
     ihealth = ehealth
+    angle = 0
+    
     while running:
         
         for event in pygame.event.get():
@@ -116,7 +109,7 @@ async def t1():
                 running = False
         
         font = pygame.font.Font('freesansbold.ttf', 50)
-        text = font.render(tex, True, '#ccffff', 'black')
+        text = font.render(tex, True, 'Black','light blue')
         textRect = text.get_rect()
         textRect.center = (1280 // 2, 100 // 2)
         
@@ -126,31 +119,98 @@ async def t1():
         
         screen.blit(text, textRect)
         
-       
+        gun = pygame.image.load('gun1.png')
+        gun.convert()
+        gun1 = gun.get_rect()
+        gun1.center = (1280/2,605)
+
+
+
+        font = pygame.font.Font('freesansbold.ttf', 30)
+        # pygame.draw.rect(screen,"red",pygame.Rect(enemy_pos.x-(ihealth/2)+ehealth, enemy_pos.y-100, ihealth-ehealth, 10))
+        
+        
+        pygame.draw.rect(screen,"white",pygame.Rect(1050,40,200,90))
+        
+        text = font.render(f" {kills} ", True, 'black')
+        textRect = text.get_rect()
+        textRect.center = (1100,110)
+        screen.blit(text, textRect)
+
+        text = font.render(f" {needkills -kills} ", True, 'black')
+        textRect.center = (1200,110)
+        screen.blit(text, textRect)
+
+        kill = pygame.image.load('killa (2).png')
+        kill.convert()
+        kill1 = kill.get_rect()
+        kill1.center = (1100,70)
+        screen.blit(kill,kill1)
+
+
+        kill = pygame.image.load('pcounter.png')
+        kill.convert()
+        kill1 = kill.get_rect()
+        kill1.center = (1200,70)
+        screen.blit(kill,kill1)
 
         #gun background
-        pygame.draw.rect(screen,color1,pygame.Rect((1280/2)-50, 550, 100, 100))
-        screen.blit(gun,gun1) 
+        mouse = pygame.mouse.get_pos()
+
+        dely = (player_pos.y-mouse[1])
+        delx = (player_pos.x-mouse[0])
+        if player_pos.x-mouse[0]!=0:
+            angle = abs(math.degrees(math.atan((player_pos.y-mouse[1])/(player_pos.x-mouse[0]))))
+        else:
+            angle = 0
+            
+        if delx <0:
+            if dely<0:angle = 360-angle 
+
+        elif delx>0:
+            gun = pygame.transform.flip(gun,False,True)
+            #angle = -angle
+            #3th quad
+            if dely<0:angle = 180+angle
+            #2st
+            else:angle = 180-angle
+
+        blitRotate(screen,gun,player_pos,[0,0],angle)
+
+
+
 
         if enemyspawn == True:
             pygame.draw.circle(screen, "red", enemy_pos, esize)
-        pygame.draw.circle(screen, "blue", player_pos, 40)
+            joe2 = pygame.image.load('dvdlogo.PNG')
+            joe2.convert()
+            joe3 = gun.get_rect()
+            joe3.center = enemy_pos
+            screen.blit(joe2,joe3)
+        pygame.draw.circle(screen, f"{color1}", player_pos, 40)
+
+        joe = pygame.image.load('jonesy.PNG')
+        joe.convert()
+        joe1 = gun.get_rect()
+        joe1.center = player_pos
+        screen.blit(joe,joe1)
+
         
 
         # enemy position
         enemy_pos.x += varx * dt
         enemy_pos.y += vary * dt 
 
-        if enemy_pos.x > 1280:
+        if enemy_pos.x >= 1280:
             
             varx = -varx
-        if enemy_pos.y > 720:
+        if enemy_pos.y >= 720:
             
             vary = -vary
-        if enemy_pos.x < 0:
+        if enemy_pos.x <= 0:
             
             varx = -varx
-        if enemy_pos.y < 0:
+        if enemy_pos.y <= 0:
             
             vary = -vary
 
@@ -228,17 +288,18 @@ async def t1():
 
 
         if event.type == pygame.MOUSEBUTTONUP:
+            
             playsound.playsound("scar.mp3",block=False)
-            mouse = pygame.mouse.get_pos()
-            #pos = mouse position(x,y)
-            #enemy_pos = center dot
-            #esize = radius
+            
+
+         
             if ((mouse[0]-enemy_pos.x)**2 + (mouse[1]-enemy_pos.y)**2)**0.5 <= esize+5:
                 ehealth -= (rarities.index(color1)+1)*5
-                print(ehealth)
+             
 
             if ehealth < 0:
                 if enemyspawn == True:
+                    kills+=1
                     playsound.playsound("fortdeath.mp3",block=False)
                     enemyspawn = False
                     skill = random.choices(list(enemy.items()),weights=(40,10,10,25,2,13))[0][1]
@@ -251,7 +312,7 @@ async def t1():
             if enemyspawn == True:
                 
                 screen.fill("black")
-
+                
                 font = pygame.font.Font('freesansbold.ttf', 50)
                 text = font.render("You Died", True, 'red', 'black')
                 textRect = text.get_rect()
@@ -261,7 +322,21 @@ async def t1():
                 pygame.display.flip()
                 playsound.playsound("brutalized.mp3")
                 exit()
-            
+
+        if needkills<= kills:
+            font = pygame.font.Font('freesansbold.ttf', 50)
+
+
+            joe4 = pygame.image.load('vicro.png')
+            joe4.convert()
+            joe5 = gun.get_rect()
+            joe5.center = (400,0)
+            screen.blit(joe4,joe5)
+
+            pygame.display.flip()
+            playsound.playsound("victory-royale.mp3")
+            exit()
+
         #chest colision detection
         if chestspawn:
             chest = False
@@ -293,8 +368,6 @@ async def main():
     tasks.append( asyncio.create_task(t1()))
     tasks.append( asyncio.create_task(t2()))
     
-
-
     for i in range(len(tasks)):
             await(tasks[i])
 
